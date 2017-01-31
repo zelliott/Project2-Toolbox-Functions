@@ -285,7 +285,7 @@ function loadFeather (framework) {
 
 function loadSkybox (scene) {
     var loader = new THREE.CubeTextureLoader();
-    var urlPrefix = 'http://zelliott.github.io/images/skymap/';
+    var urlPrefix = './images/skymap/';
     var urlSuffix = '';
 
     var skymap = new THREE.CubeTextureLoader().load([
