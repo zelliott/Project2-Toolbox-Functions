@@ -1,5 +1,29 @@
 # [Project2: Toolbox Functions](https://github.com/CIS700-Procedural-Graphics/Project2-Toolbox-Functions)
 
+## Description
+
+I'm not a very good sketcher, so this project was pretty challenging.  I spent a lot of time browsing realistic images of wings, feather distributions, and flapping patterns, and struggled to bring a lot of them to life in my implementation.  That being said, I learned a lot about toolbox functions in this project, which was cool.
+
+#### Wing shape
+
+The shape of the wing is a cubic spline, with two of the endpoints connected with a straight line to make a curved 3D plane.  It's not the most realistic shape of a wing, but I thought it looked neat.  I added GUI functionality to modify the 4 control points of the spline so that I could quickly move the points around and create the curve shape I wanted.
+
+#### Wing flapping
+
+I defined five stroke "positions" (various low/mid/high strokes) and attempted to make my wing flap by interpolating my spline's control points to the various flap positions.  That is, if my wing begins in stroke position 1, it first interpolates to stroke position 2, then stroke position 3, and so on.  These stroke positions are defined in the `coordinates.js` file.  Given that I am using basic LERP to transform my spline, the flapping motion looks as though it is broken down into five steps, unfortunately.  I tried to use smooth step & sine curves to make the flapping smoother, to no avail.  If given more time, I would have defined another cubic spline by the five stroke position points that I would have moved my wing along.
+
+#### Feathers
+
+Feathers are positioned around the curved portion of the wing in three separate layers.  Each layer has customizable sizes, colors, and feather distributions.  One of the things I struggled with was getting the feathers to "point" in the correct direction.  Given I flap my wing by moving my spline's control points, the feathers occasionally point in an incorrect direction, and it's pretty difficult to calculate the correct axis and angle to use to rotate each feather during flapping.  In hindsight, I would have **not** used control points to flap my wing, and instead used normal matrix rotations & translations.  I would have constructed a scene-graph implementation where the feathers are children of the wing root node.  This way, the feathers would trivially point in the correct direction, regardless of the wing's overall rotation.
+
+#### Wind
+
+Based upon the wind direction and strength, I vibrate the feathers in a specific direction.
+
+#### GUI
+
+Many, many aspects of this implementation can be modified in the GUI.  This includes (1) which portions of the wing are visible (control points, outline, feathers, etc...), (2) whether or not the wing is flapping or wind exists, (3) various feather customizations, and (4) the wing's overall shape.
+
 ## Overview
 
 The objective of this assignment is to procedurally model and animate a bird wing. Let's get creative!
@@ -18,7 +42,7 @@ Begin with a 3D curve for your basic wing shape. Three.js provides classes to cr
 
 ##### Distribute feathers
 
-We have provided a simple feather model from which to begin. You are not required to use this model if you have others that you prefer. From this base, you must duplicate the feather to model a complete wing, and your wing should consist of at least thirty feathers. Distribute points along the curve you created previously; you will append the feather primitives to the curve at these points. Make sure that you modify the size, orientation, and color of your feathers depending on their location on the wing. 
+We have provided a simple feather model from which to begin. You are not required to use this model if you have others that you prefer. From this base, you must duplicate the feather to model a complete wing, and your wing should consist of at least thirty feathers. Distribute points along the curve you created previously; you will append the feather primitives to the curve at these points. Make sure that you modify the size, orientation, and color of your feathers depending on their location on the wing.
 
 Feel free to diversify your wings by using multiple base feather models.
 

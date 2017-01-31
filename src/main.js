@@ -8,13 +8,72 @@ import Framework from './framework'
 import Helpers from './helpers'
 import Coords from './coordinates'
 
-var settingsGUI = {
-    flap: false,
-    showFeathers: true,
-    showWingCurve: true,
-    showControlPoints: true,
-    showWingOutline: true
+var mainSettingsGUI = {
+    flap: {
+        val: true,
+        name: 'Flap wing'
+    },
+    flapSpeed: {
+        val: 2.0,
+        name: 'Flap speed'
+    },
+    showFeathers: {
+        val: true,
+        name: 'Show feathers'
+    },
+    showWingCurve: {
+        val: false,
+        name: 'Show shape'
+    },
+    showControlPoints: {
+        val: false,
+        name: 'Show ctrl points'
+    },
+    showWingOutline: {
+        val: false,
+        name: 'Show outline'
+    }
 };
+
+var windSettingsGUI = {
+    directionX: {
+        val: false,
+        name: 'X direction'
+    },
+    directionY: {
+        val: false,
+        name: 'Y direction'
+    },
+    directionZ: {
+        val: true,
+        name: 'Z direction'
+    },
+    strength: {
+        val: 1.0,
+        name: 'Strength'
+    }
+};
+
+var featherSettingsGUI = {
+    firstLayer: {
+        scale: 6.0,
+        count: 30,
+        distribution: new THREE.Vector3(0.0, 0.0, 0.0),
+        color: 0xFD6E4C
+    },
+    secondLayer: {
+        scale: 6.0,
+        count: 30,
+        distribution: new THREE.Vector3(-5.0, 0.0, 0.0),
+        color: 0xFEB251
+    },
+    thirdLayer: {
+        scale: 2.0,
+        count: 60,
+        distribution: new THREE.Vector3(-5.0, 0.0, 1.0),
+        color: 0xFFE456
+    }
+}
 
 var loadedFeather;
 
@@ -27,7 +86,6 @@ var pointsMatParams = {
 
 var curveObj;
 var curveMatParams = {
-    color: 0xff0000,
     side: THREE.DoubleSide,
     wireframe: false
 };
@@ -40,30 +98,13 @@ var outlineMatParams = {
 
 var featherObjs = [];
 var featherMatParams = {
-    color: 0xaaaaaa,
     side: THREE.DoubleSide
 };
 var featherLayout = [
-    {
-        scale: 4.0,
-        count: 30,
-        countRange: [0, 30],
-        distribution: new THREE.Vector3(0.0, 0.0, 0.0),
-        orientation: new THREE.Vector3(0.0, 0.0, Math.PI)
-    } // ,
-    // {
-    //     scale: 2.0,
-    //     count: 15,
-    //     countRange: [0, 15],
-    //     distribution: new THREE.Vector3(0.0, 0.0, 0.0),
-    //     orientation: new THREE.Vector3(Math.PI / 8.0, 0.0, Math.PI)
-    // },
-    // {
-    //     scale: 1.0,
-    //     distribution: new THREE.Vector3(0.0, 0.0, 0.0),
-    //     orientation: new THREE.Vector3(0.0, 0.0, Math.PI)
-    // }
-]
+    featherSettingsGUI.firstLayer,
+    featherSettingsGUI.secondLayer,
+    featherSettingsGUI.thirdLayer
+];
 
 var coordsFlap = [ Coords.A, Coords.B, Coords.C, Coords.D, Coords.E ];
 var coordsFlapIndex = 0;
@@ -140,7 +181,6 @@ function renderFeathers () {
     });
 
     var bezCurve = new THREE.CubicBezierCurve3(points[0], points[1], points[2], points[3]);
-    var featherMat = new THREE.MeshLambertMaterial(featherMatParams);
 
     featherObjs = [];
 
@@ -148,31 +188,54 @@ function renderFeathers () {
         _.each(featherLayout, layout => {
             var count = layout.count;
             var distr = layout.distribution;
-            var orien = layout.orientation;
             var scale = layout.scale;
-            var countRange = layout.countRange;
+            var color = layout.color;
 
-            var numPoints = 10;
             var vertices = bezCurve.getPoints(count);
-            var factor = 0.99;
+            var scaleFactor = 1.0;
 
             _.each(vertices, (vertex, i) => {
-                if (_.inRange(i, countRange[0], countRange[1])) {
-                    var featherObj = loadedFeather.clone();
+                var featherObj = loadedFeather.clone();
 
-                    featherObj.name = 'feather';
-                    featherObj.position.set(vertex.x + distr.x, vertex.y + distr.y, vertex.z + distr.z);
-                    featherObj.rotation.set(orien.x, orien.y, orien.z);
-                    featherObj.scale.set(scale, scale, scale);
+                featherObj.name = 'feather';
+                featherObj.position.set(vertex.x + distr.x, vertex.y + distr.y, vertex.z + distr.z);
+                featherObj.scale.set(scale, scale, scale);
 
-                    featherObjs.push(featherObj);
+                featherObj.traverse(child => {
+                    if (child instanceof THREE.Mesh) {
+                        var featherMat = new THREE.MeshBasicMaterial(featherMatParams);
+                        featherMat.color = new THREE.Color(color);
+                        child.material = featherMat;
+                    }
+                });
 
-                    scale *= factor;
-                }
+                featherObjs.push(featherObj);
+
+                scale *= scaleFactor;
             });
         });
     }
+};
 
+function renderWind () {
+    _.each(featherObjs, featherObj => {
+        console.log(featherObj);
+        var date = new Date();
+        var t = Math.sin(date.getTime() / 100) * 2 * Math.PI / 180;
+        var strength = windSettingsGUI.strength.val;
+
+        if (windSettingsGUI.directionX.val) {
+            featherObj.rotateX(t * strength);
+        }
+
+        if (windSettingsGUI.directionY.val) {
+            featherObj.rotateY(t * strength);
+        }
+
+        if (windSettingsGUI.directionZ.val) {
+            featherObj.rotateZ(t * strength);
+        }
+    });
 };
 
 function renderWing (framework) {
@@ -190,22 +253,23 @@ function renderWing (framework) {
     renderPoints();
     renderOutline();
     renderFeathers();
+    renderWind();
 
-    if (settingsGUI.showWingCurve) {
+    if (mainSettingsGUI.showWingCurve.val) {
         scene.add(curveObj);
     }
 
-    if (settingsGUI.showControlPoints) {
+    if (mainSettingsGUI.showControlPoints.val) {
         scene.add(pointsObj);
     }
 
-    if (settingsGUI.showFeathers) {
+    if (mainSettingsGUI.showFeathers.val) {
         _.each(featherObjs, featherObj => {
             scene.add(featherObj);
         });
     }
 
-    if (settingsGUI.showWingOutline) {
+    if (mainSettingsGUI.showWingOutline.val) {
         scene.add(outlineObj);
     }
 }
@@ -245,7 +309,7 @@ function onLoad (framework) {
     loadSkybox(scene);
 
     // Camera
-    camera.position.set(0, -20, 0);
+    camera.position.set(0, -40, 0);
     camera.lookAt(new THREE.Vector3(0,0,0));
 
     scene.add(directionalLight);
@@ -256,33 +320,42 @@ function onLoad (framework) {
         camera.updateProjectionMatrix();
     });
 
-    _.each(settingsGUI, (val, key) => {
-        gui.add(settingsGUI, key).onChange(function () { renderWing(framework); });
+    var guiMainFolder = gui.addFolder('Main settings');
+    _.each(mainSettingsGUI, (val, key) => {
+        guiMainFolder.add(mainSettingsGUI[key], 'val').name(val.name).onChange(function () { renderWing(framework); });
     });
 
-    // GUI controls for manipulating wing curve manually
-    // _.each(coords, (coord, name) => {
-    //     gui.add(coord, 'x', -40, 40).name(name + 'x').onChange(function () { renderWing(framework); });
-    //     gui.add(coord, 'y', -40, 40).name(name + 'y').onChange(function () { renderWing(framework);});
-    //     gui.add(coord, 'z', -40, 40).name(name + 'z').onChange(function () { renderWing(framework); });
-    // });
+    var guiWindFolder = gui.addFolder('Wind settings');
+    _.each(windSettingsGUI, (val, key) => {
+        guiWindFolder.add(windSettingsGUI[key], 'val').name(val.name).onChange(function () { renderWind(framework); });
+    });
+
+    var guiFeatherFolder = gui.addFolder('Feather settings');
+    _.each(featherSettingsGUI, (val, key) => {
+        guiFeatherFolder.add(featherSettingsGUI[key], 'scale').name('Scale').onChange(function () { renderWing(framework); });
+        guiFeatherFolder.add(featherSettingsGUI[key], 'count').name('Count').onChange(function () { renderWing(framework); });
+        guiFeatherFolder.addColor(featherSettingsGUI[key], 'color').name('Color').onChange(function () { renderWing(framework); });
+    });
+
+    var guiWingCurveFolder = gui.addFolder('Change wing shape');
+    _.each(coords, (val, key) => {
+        guiWingCurveFolder.add(val, 'x', -40, 40).name('Point ' + key + ': x')
+            .onChange(function () { renderWing(framework); });
+        guiWingCurveFolder.add(val, 'y', -40, 40).name('Point ' + key + ': y')
+            .onChange(function () { renderWing(framework); });
+        guiWingCurveFolder.add(val, 'z', -40, 40).name('Point ' + key + ': z')
+            .onChange(function () { renderWing(framework); });
+    });
 }
 
-// called on frame updates
 var t = 0;
 
 function onUpdate(framework) {
-    // var feather = framework.scene.getObjectByName("feather");
-    // if (feather !== undefined) {
-    //     // Simply flap wing
-    //     var date = new Date();
-    //     feather.rotateZ(Math.sin(date.getTime() / 100) * 2 * Math.PI / 180);
-    // }
+    if (mainSettingsGUI.flap.val) {
+        t += (0.02 * mainSettingsGUI.flapSpeed.val);
+        console.log(t);
 
-    if (settingsGUI.flap) {
-        t += 0.05;
-
-        var s = Helpers.smootherstep(0.0, 1.0, t);
+        var s = t;
 
         _.each(coords, (coord, name) => {
             var u = coordsFlap[coordsFlapIndex][name];
@@ -293,14 +366,14 @@ function onUpdate(framework) {
             });
         });
 
-        if (Math.abs(t - 1.0) <= 0.0001) {
+        if (Math.abs(t - 1.0) <= 0.0001 || t > 1.0) {
             coordsFlapIndex++;
             coordsFlapIndex %= 5;
             t = 0.0;
         }
-
-        renderWing(framework);
     }
+
+     renderWing(framework);
 }
 
 Framework.init(onLoad, onUpdate);
