@@ -278,7 +278,7 @@ function loadFeather (framework) {
     var loader = new THREE.OBJLoader();
     var urlPrefix = 'https://raw.githubusercontent.com/zelliott/Project2-Toolbox-Functions/master/geo/feather.obj';
 
-    loader.load(url, feather => {
+    loader.load(urlPrefix, feather => {
         loadedFeather = feather;
         renderWing(framework);
     });
