@@ -219,7 +219,6 @@ function renderFeathers () {
 
 function renderWind () {
     _.each(featherObjs, featherObj => {
-        console.log(featherObj);
         var date = new Date();
         var t = Math.sin(date.getTime() / 100) * 2 * Math.PI / 180;
         var strength = windSettingsGUI.strength.val;
@@ -286,8 +285,8 @@ function loadFeather (framework) {
 
 function loadSkybox (scene) {
     var loader = new THREE.CubeTextureLoader();
-    var urlPrefix = 'https://github.com/zelliott/Project2-Toolbox-Functions/blob/master/images/skymap/';
-    var urlSuffix = '?raw=true';
+    var urlPrefix = 'http://zelliott.github.io/images/skymap/';
+    var urlSuffix = '';
 
     var skymap = new THREE.CubeTextureLoader().load([
         urlPrefix + 'px.jpg' + urlSuffix, urlPrefix + 'nx.jpg' + urlSuffix,
