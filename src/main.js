@@ -275,9 +275,10 @@ function renderWing (framework) {
 }
 
 function loadFeather (framework) {
-     var loader = new THREE.OBJLoader();
+    var loader = new THREE.OBJLoader();
+    var urlPrefix = 'https://raw.githubusercontent.com/zelliott/Project2-Toolbox-Functions/master/geo/feather.obj';
 
-    loader.load('/geo/feather.obj', feather => {
+    loader.load(url, feather => {
         loadedFeather = feather;
         renderWing(framework);
     });
@@ -285,12 +286,13 @@ function loadFeather (framework) {
 
 function loadSkybox (scene) {
     var loader = new THREE.CubeTextureLoader();
-    var urlPrefix = '/images/skymap/';
+    var urlPrefix = 'https://github.com/zelliott/Project2-Toolbox-Functions/blob/master/images/skymap/';
+    var urlSuffix = '?raw=true';
 
     var skymap = new THREE.CubeTextureLoader().load([
-        urlPrefix + 'px.jpg', urlPrefix + 'nx.jpg',
-        urlPrefix + 'py.jpg', urlPrefix + 'ny.jpg',
-        urlPrefix + 'pz.jpg', urlPrefix + 'nz.jpg'
+        urlPrefix + 'px.jpg' + urlSuffix, urlPrefix + 'nx.jpg' + urlSuffix,
+        urlPrefix + 'py.jpg' + urlSuffix, urlPrefix + 'ny.jpg' + urlSuffix,
+        urlPrefix + 'pz.jpg' + urlSuffix, urlPrefix + 'nz.jpg' + urlSuffix
     ]);
 
     scene.background = skymap;
