@@ -306,7 +306,7 @@ function onLoad (framework) {
     directionalLight.position.multiplyScalar(10);
 
     loadFeather(framework);
-    // loadSkybox(scene);
+    loadSkybox(scene);
 
     // Camera
     camera.position.set(0, -40, 0);
