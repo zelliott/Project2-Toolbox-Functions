@@ -306,7 +306,7 @@ function onLoad (framework) {
     directionalLight.position.multiplyScalar(10);
 
     loadFeather(framework);
-    loadSkybox(scene);
+    // loadSkybox(scene);
 
     // Camera
     camera.position.set(0, -40, 0);
@@ -353,7 +353,6 @@ var t = 0;
 function onUpdate(framework) {
     if (mainSettingsGUI.flap.val) {
         t += (0.02 * mainSettingsGUI.flapSpeed.val);
-        console.log(t);
 
         var s = t;
 
